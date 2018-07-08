@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="/dist/app.css" />
+
+    <title>Idol detection</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
+      <a class="navbar-brand" href="#">Idol detection</a>
+    </nav>
+
+    <main class="container">
+      <div class="row">
+        <div class="col-sm-12">
+        <form id="upload-form" class="form-inline">
+          <div class="form-group">
+            <label for="uploader">Chọn file để upload</label>
+            <input type="file" class="form-control-file" id="uploader" />
+          </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          <canvas id="artboard" style="width: 1000px; height: 1000px;" width="1000" height="1000"> 
+          </canvas>
+        </div>
+      </div>
+    </main>
+
+    <script src="/dist/app.bundle.js"></script>
+  </body>
+</html>
