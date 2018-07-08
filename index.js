@@ -12,7 +12,7 @@ $(document).ready(function() {
     const formData = new FormData();
     formData.append('image', file);
     return $.ajax({
-      url : 'http://35.240.215.63/api/recognition',
+      url : 'https://idol.chuphinhthe.com/api/recognition',
       type : 'POST',
       data : formData,
       processData: false,  // tell jQuery not to process the data
