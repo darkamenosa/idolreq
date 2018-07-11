@@ -78,13 +78,13 @@ function drawImage(file) {
 
   const img = new Image();
   img.onload = function() {
-    const { xStart, yStart, renderableWidth, renderableHeight } = fitImageOn(
-      canvas,
-      img,
-    );
-    canvas
-      .getContext('2d')
-      .drawImage(img, xStart, yStart, renderableWidth, renderableHeight);
+    // TODO: integrate scale image
+    // const { xStart, yStart, renderableWidth, renderableHeight } = fitImageOn(
+    //   canvas,
+    //   img,
+    // );
+    canvas.height = img.height;
+    canvas.getContext('2d').drawImage(img, 0, 0);
   };
   img.src = URL.createObjectURL(file);
 }
@@ -92,7 +92,7 @@ function drawImage(file) {
 function fitImageOn(canvas, imageObj) {
   var imageAspectRatio = imageObj.width / imageObj.height;
   var canvasAspectRatio = canvas.width / canvas.height;
-  let renderableHeight, renderableWidth, xStart, yStart;
+  let renderableHeight, renderableWidth, xStart, yStart, biggerRatio;
 
   // image's aspect ratio is less than canvas
   if (imageAspectRatio < canvasAspectRatio) {
@@ -100,6 +100,7 @@ function fitImageOn(canvas, imageObj) {
     renderableWidth = imageObj.width * (renderableHeight / imageObj.height);
     xStart = (canvas.width - renderableWidth) / 2;
     yStart = 0;
+    biggerRatio = 'canvas';
   }
 
   // image's aspect ratio is greater than canvas
@@ -108,6 +109,7 @@ function fitImageOn(canvas, imageObj) {
     renderableHeight = imageObj.height * (renderableWidth / imageObj.width);
     xStart = 0;
     yStart = (canvas.height - renderableHeight) / 2;
+    biggerRatio = 'img';
   }
 
   // Happy path - keep aspect ratio
@@ -116,6 +118,7 @@ function fitImageOn(canvas, imageObj) {
     renderableWidth = canvas.width;
     xStart = 0;
     yStart = 0;
+    biggerRatio = 'canvas';
   }
 
   return {
@@ -123,12 +126,12 @@ function fitImageOn(canvas, imageObj) {
     renderableWidth,
     xStart,
     yStart,
+    biggerRatio,
   };
 }
 
 function drawRect({ x, y, w, h }) {
   const ctx = getCanvas().getContext('2d');
-
   // Draw rect
   ctx.beginPath();
   ctx.rect(x, y, w, h);
@@ -166,7 +169,6 @@ function resetFiles() {
 
 function toast(text) {
   $toast.html(text).addClass('show');
-  // After 3 seconds, remove the show class from DIV
   setTimeout(function() {
     $toast.removeClass('show');
   }, 3000);
@@ -250,6 +252,6 @@ $form.on('submit', e => {
     })
     .catch(err => {
       console.log(err);
-      // $form.removeClass('is-uploading');
+      $form.removeClass('is-uploading');
     });
 });

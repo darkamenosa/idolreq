@@ -209,13 +209,13 @@ function drawImage(file) {
 
   var img = new Image();
   img.onload = function () {
-    var _fitImageOn = fitImageOn(canvas, img),
-        xStart = _fitImageOn.xStart,
-        yStart = _fitImageOn.yStart,
-        renderableWidth = _fitImageOn.renderableWidth,
-        renderableHeight = _fitImageOn.renderableHeight;
-
-    canvas.getContext('2d').drawImage(img, xStart, yStart, renderableWidth, renderableHeight);
+    // TODO: integrate scale image
+    // const { xStart, yStart, renderableWidth, renderableHeight } = fitImageOn(
+    //   canvas,
+    //   img,
+    // );
+    canvas.height = img.height;
+    canvas.getContext('2d').drawImage(img, 0, 0);
   };
   img.src = URL.createObjectURL(file);
 }
@@ -226,7 +226,8 @@ function fitImageOn(canvas, imageObj) {
   var renderableHeight = void 0,
       renderableWidth = void 0,
       xStart = void 0,
-      yStart = void 0;
+      yStart = void 0,
+      biggerRatio = void 0;
 
   // image's aspect ratio is less than canvas
   if (imageAspectRatio < canvasAspectRatio) {
@@ -234,6 +235,7 @@ function fitImageOn(canvas, imageObj) {
     renderableWidth = imageObj.width * (renderableHeight / imageObj.height);
     xStart = (canvas.width - renderableWidth) / 2;
     yStart = 0;
+    biggerRatio = 'canvas';
   }
 
   // image's aspect ratio is greater than canvas
@@ -242,6 +244,7 @@ function fitImageOn(canvas, imageObj) {
       renderableHeight = imageObj.height * (renderableWidth / imageObj.width);
       xStart = 0;
       yStart = (canvas.height - renderableHeight) / 2;
+      biggerRatio = 'img';
     }
 
     // Happy path - keep aspect ratio
@@ -250,13 +253,15 @@ function fitImageOn(canvas, imageObj) {
         renderableWidth = canvas.width;
         xStart = 0;
         yStart = 0;
+        biggerRatio = 'canvas';
       }
 
   return {
     renderableHeight: renderableHeight,
     renderableWidth: renderableWidth,
     xStart: xStart,
-    yStart: yStart
+    yStart: yStart,
+    biggerRatio: biggerRatio
   };
 }
 
@@ -267,7 +272,6 @@ function drawRect(_ref) {
       h = _ref.h;
 
   var ctx = getCanvas().getContext('2d');
-
   // Draw rect
   ctx.beginPath();
   ctx.rect(x, y, w, h);
@@ -310,7 +314,6 @@ function resetFiles() {
 
 function toast(text) {
   $toast.html(text).addClass('show');
-  // After 3 seconds, remove the show class from DIV
   setTimeout(function () {
     $toast.removeClass('show');
   }, 3000);
@@ -382,7 +385,7 @@ $form.on('submit', function (e) {
     }, 1000);
   }).catch(function (err) {
     console.log(err);
-    // $form.removeClass('is-uploading');
+    $form.removeClass('is-uploading');
   });
 });
 

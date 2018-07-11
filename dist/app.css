@@ -11388,8 +11388,6 @@ body {
 }
 
 .box.has-advanced-upload .box__icon {
-	width: 100%;
-	height: 80px;
 	fill: #92b0b3;
 	display: block;
 	margin-bottom: 40px;
@@ -11405,7 +11403,6 @@ body {
 }
 
 .box__file+label {
-	max-width: 80%;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	cursor: pointer;
@@ -11473,6 +11470,10 @@ body {
 .reset__button:hover,
 .reset__button:focus {
 	background-color: #0f3c4b;
+}
+
+.box__canvas {
+	margin-bottom: 10px;
 }
 
 /* loading */
@@ -11591,6 +11592,11 @@ button .loadingSpinner {
 		bottom: 0;
 		opacity: 0;
 	}
+}
+
+.navbar-dark .navbar-brand h1 {
+	font-size: 24px;
+	margin: 0;
 }
 
 /*# sourceMappingURL=app.css.map*/
