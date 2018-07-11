@@ -12,7 +12,8 @@ const $box = $('.box'),
   $btnSubmit = $('.box__button'),
   $btnReset = $('.reset__button'),
   $boxDropFile = $('.box__drop_file'),
-  $boxCanvas = $('.box__canvas');
+  $boxCanvas = $('.box__canvas'),
+  $toast = $('#snackbar');
 let droppedFiles = false;
 
 //-----------------------------------------------
@@ -163,6 +164,13 @@ function resetFiles() {
   droppedFiles = false;
 }
 
+function toast(text) {
+  $toast.html(text).addClass('show');
+  // After 3 seconds, remove the show class from DIV
+  setTimeout(function() {
+    $toast.removeClass('show');
+  }, 3000);
+}
 //-----------------------------------------------
 // site effect drag drop
 //-----------------------------------------------
@@ -221,7 +229,7 @@ $form.on('submit', e => {
   }
   // prevent empty file
   if (!file) {
-    alert('Please select your idol!');
+    toast('Please select your idol!');
     $form.removeClass('is-uploading');
     return;
   }
