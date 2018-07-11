@@ -11348,6 +11348,10 @@ a.text-dark:hover, a.text-dark:focus {
 	}
 }
 
+.hidden {
+	display: none !important;
+}
+
 body {
 	font-family: Roboto, sans-serif;
 	color: #0f3c4b;
@@ -11362,6 +11366,7 @@ body {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	padding: 20px;
 }
 
 .box.has-advanced-upload {
@@ -11378,11 +11383,6 @@ body {
 	background-color: #fff;
 }
 
-.box__dragndrop,
-.box__icon {
-	display: none;
-}
-
 .box.has-advanced-upload .box__dragndrop {
 	display: inline;
 }
@@ -11393,75 +11393,6 @@ body {
 	fill: #92b0b3;
 	display: block;
 	margin-bottom: 40px;
-}
-
-.box.is-uploading .box__input,
-.box.is-success .box__input,
-.box.is-error .box__input {
-	visibility: hidden;
-}
-
-.box__uploading,
-.box__success,
-.box__error {
-	display: none;
-}
-
-.box.is-uploading .box__uploading,
-.box.is-success .box__success,
-.box.is-error .box__error {
-	display: block;
-	position: absolute;
-	top: 50%;
-	right: 0;
-	left: 0;
-	-webkit-transform: translateY( -50%);
-	transform: translateY( -50%);
-}
-
-.box__uploading {
-	font-style: italic;
-}
-
-.box__success {
-	-webkit-animation: appear-from-inside .25s ease-in-out;
-	animation: appear-from-inside .25s ease-in-out;
-}
-
-@-webkit-keyframes appear-from-inside {
-	from {
-		-webkit-transform: translateY( -50%) scale( 0);
-	}
-	75% {
-		-webkit-transform: translateY( -50%) scale( 1.1);
-	}
-	to {
-		-webkit-transform: translateY( -50%) scale( 1);
-	}
-}
-
-@keyframes appear-from-inside {
-	from {
-		-webkit-transform: translateY( -50%) scale( 0);
-		        transform: translateY( -50%) scale( 0);
-	}
-	75% {
-		-webkit-transform: translateY( -50%) scale( 1.1);
-		        transform: translateY( -50%) scale( 1.1);
-	}
-	to {
-		-webkit-transform: translateY( -50%) scale( 1);
-		        transform: translateY( -50%) scale( 1);
-	}
-}
-
-.box__restart {
-	font-weight: 700;
-}
-
-.box__restart:focus,
-.box__restart:hover {
-	color: #39bfd3;
 }
 
 .box__file {
@@ -11494,31 +11425,105 @@ body {
 	outline: -webkit-focus-ring-color auto 5px;
 }
 
-.box__file+label * {
-	/* pointer-events: none; */
-	/* in case of FastClick lib use */
-}
-
-.no-js .box__file+label {
-	display: none;
-}
-
-.no-js .box__button {
-	display: block;
-}
-
 .box__button {
 	font-weight: 700;
 	color: #e5edf1;
 	background-color: #39bfd3;
 	display: block;
 	padding: 8px 16px;
-	margin: 40px auto 0;
+	margin: 5px auto 0;
+	position: relative;
+	width: 200px;
+	height: 50px;
+	border-radius: 8px;
+	border: none;
+	outline: none !important;
+	font-size: 17px;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+
+.box__button span {
+	transition: all .3s;
 }
 
 .box__button:hover,
 .box__button:focus {
 	background-color: #0f3c4b;
+}
+
+.reset__button {
+	font-weight: 700;
+	color: #e5edf1;
+	background-color: #39bfd3;
+	display: block;
+	padding: 8px 16px;
+	margin: 5px auto 0;
+	position: relative;
+	width: 200px;
+	height: 50px;
+	border-radius: 8px;
+	border: none;
+	outline: none !important;
+	font-size: 17px;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+
+.reset__button:hover,
+.reset__button:focus {
+	background-color: #0f3c4b;
+}
+
+/* loading */
+
+.loadingSpinner {
+	border: 4px solid #FFF;
+	border-top-color: rgba(0, 0, 0, 0);
+	border-left-color: rgba(0, 0, 0, 0);
+	width: 20px;
+	height: 20px;
+	opacity: 0.8;
+	border-radius: 50%;
+	animation: loadingSpinner 0.7s infinite linear;
+	-webkit-animation: loadingSpinner 0.7s infinite linear;
+}
+
+button .loadingSpinner {
+	display: none;
+	margin-top: -10px;
+	margin-left: -14px;
+	position: absolute;
+	top: 50%;
+	right: 40px;
+}
+
+.is-uploading button span {
+	margin-left: -20px;
+}
+
+.is-uploading button .loadingSpinner {
+	display: block;
+}
+
+@keyframes loadingSpinner {
+	from {
+		-webkit-transform: rotate(0deg);
+		        transform: rotate(0deg);
+	}
+	to {
+		-webkit-transform: rotate(360deg);
+		        transform: rotate(360deg);
+	}
+}
+
+@-webkit-keyframes loadingSpinner {
+	from {
+		-webkit-transform: rotate(0deg);
+	}
+	to {
+		-webkit-transform: rotate(360deg);
+	}
 }
 
 /*# sourceMappingURL=app.css.map*/

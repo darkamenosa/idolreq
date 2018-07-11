@@ -6,7 +6,14 @@ import './css/style.css';
 
 import $ from 'jquery';
 
-import './js/jquery.custom-file-input';
+const $box = $('.box'),
+  $form = $('#upload-form'),
+  $input = $box.find('input[type="file"]'),
+  $btnSubmit = $('.box__button'),
+  $btnReset = $('.reset__button'),
+  $boxDropFile = $('.box__drop_file'),
+  $boxCanvas = $('.box__canvas');
+let droppedFiles = false;
 
 //-----------------------------------------------
 // Functional methods
@@ -66,13 +73,56 @@ function clearCanvas() {
 
 function drawImage(file) {
   if (!file) return;
-  const ctx = getCanvas().getContext('2d');
-  console.log(file);
+  const canvas = getCanvas();
+
   const img = new Image();
   img.onload = function() {
-    ctx.drawImage(img, 0, 0);
+    const { xStart, yStart, renderableWidth, renderableHeight } = fitImageOn(
+      canvas,
+      img,
+    );
+    canvas
+      .getContext('2d')
+      .drawImage(img, xStart, yStart, renderableWidth, renderableHeight);
   };
   img.src = URL.createObjectURL(file);
+}
+
+function fitImageOn(canvas, imageObj) {
+  var imageAspectRatio = imageObj.width / imageObj.height;
+  var canvasAspectRatio = canvas.width / canvas.height;
+  let renderableHeight, renderableWidth, xStart, yStart;
+
+  // image's aspect ratio is less than canvas
+  if (imageAspectRatio < canvasAspectRatio) {
+    renderableHeight = canvas.height;
+    renderableWidth = imageObj.width * (renderableHeight / imageObj.height);
+    xStart = (canvas.width - renderableWidth) / 2;
+    yStart = 0;
+  }
+
+  // image's aspect ratio is greater than canvas
+  else if (imageAspectRatio > canvasAspectRatio) {
+    renderableWidth = canvas.width;
+    renderableHeight = imageObj.height * (renderableWidth / imageObj.width);
+    xStart = 0;
+    yStart = (canvas.height - renderableHeight) / 2;
+  }
+
+  // Happy path - keep aspect ratio
+  else {
+    renderableHeight = canvas.height;
+    renderableWidth = canvas.width;
+    xStart = 0;
+    yStart = 0;
+  }
+
+  return {
+    renderableHeight,
+    renderableWidth,
+    xStart,
+    yStart,
+  };
 }
 
 function drawRect({ x, y, w, h }) {
@@ -95,20 +145,103 @@ function drawName({ name, prob, x, y }) {
   ctx.fillText(`${name} - ${prob.toFixed(2)}`, x, y - 10);
 }
 
+function showFiles(files) {
+  if (!files || !files.length) return;
+
+  clearCanvas();
+  $boxCanvas.removeClass('hidden');
+  $boxDropFile.addClass('hidden');
+  drawImage(files[0]);
+}
+
+function resetFiles() {
+  $boxCanvas.addClass('hidden');
+  $btnReset.addClass('hidden');
+  $boxDropFile.removeClass('hidden');
+  $btnSubmit.removeClass('hidden');
+  clearCanvas();
+  droppedFiles = false;
+}
+
+//-----------------------------------------------
+// site effect drag drop
+//-----------------------------------------------
+
+const isAdvancedUpload = (function() {
+  const div = document.createElement('div');
+  return (
+    ('draggable' in div || ('ondragstart' in div && 'ondrop' in div)) &&
+    'FormData' in window &&
+    'FileReader' in window
+  );
+})();
+
+$input
+  .on('focus', function() {
+    $input.addClass('has-focus');
+  })
+  .on('blur', function() {
+    $input.removeClass('has-focus');
+  });
+
+if (isAdvancedUpload) {
+  $box
+    .on('drag dragstart dragend dragover dragenter dragleave drop', function(
+      e,
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
+    })
+    .on('dragover dragenter', function() {
+      $box.addClass('is-dragover');
+    })
+    .on('dragleave dragend drop', function() {
+      $box.removeClass('is-dragover');
+    })
+    .on('drop', function(e) {
+      droppedFiles = e.originalEvent.dataTransfer.files;
+      showFiles(droppedFiles);
+    });
+}
+
 //-----------------------------------------------
 // Main methods
 //-----------------------------------------------
 
+$input.on('change', e => showFiles(e.target.files));
 
-$('#upload-form').on('submit', e => {
+$btnReset.on('click', resetFiles);
+
+$form.on('submit', e => {
   e.preventDefault();
-  const file = $('#uploader')[0].files[0];
-  // Clear canvas and draw image
-  clearCanvas();
-  drawImage(file);
+
+  let file = $input[0].files[0];
+  if (isAdvancedUpload && droppedFiles) {
+    file = droppedFiles[0];
+  }
+  // prevent empty file
+  if (!file) {
+    alert('Please select your idol!');
+    $form.removeClass('is-uploading');
+    return;
+  }
+  // prevent multi check
+  if ($form.hasClass('is-uploading')) return false;
+
+  $form.addClass('is-uploading');
 
   // Upload file to get detection and draw result
-  uploadFile(file).then(response => {
-    response.data.forEach(sideEffectCompose(drawRect, drawName, saveContext));
-  });
+  uploadFile(file)
+    .then(response => {
+      response.data.forEach(sideEffectCompose(drawRect, drawName, saveContext));
+      setTimeout(() => {
+        $form.removeClass('is-uploading');
+        $btnSubmit.addClass('hidden');
+        $btnReset.removeClass('hidden');
+      }, 1000);
+    })
+    .catch(err => {
+      console.log(err);
+      // $form.removeClass('is-uploading');
+    });
 });

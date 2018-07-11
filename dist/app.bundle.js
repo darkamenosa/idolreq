@@ -130,14 +130,21 @@ var _jquery = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jque
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-__webpack_require__(/*! ./js/jquery.custom-file-input */ "./js/jquery.custom-file-input.js");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var $box = (0, _jquery2.default)('.box'),
+    $form = (0, _jquery2.default)('#upload-form'),
+    $input = $box.find('input[type="file"]'),
+    $btnSubmit = (0, _jquery2.default)('.box__button'),
+    $btnReset = (0, _jquery2.default)('.reset__button'),
+    $boxDropFile = (0, _jquery2.default)('.box__drop_file'),
+    $boxCanvas = (0, _jquery2.default)('.box__canvas'); // Import your code here
+
+var droppedFiles = false;
 
 //-----------------------------------------------
 // Functional methods
 //-----------------------------------------------
-// Import your code here
 function identity(val) {
   return val;
 }
@@ -197,13 +204,59 @@ function clearCanvas() {
 
 function drawImage(file) {
   if (!file) return;
-  var ctx = getCanvas().getContext('2d');
-  console.log(file);
+  var canvas = getCanvas();
+
   var img = new Image();
   img.onload = function () {
-    ctx.drawImage(img, 0, 0);
+    var _fitImageOn = fitImageOn(canvas, img),
+        xStart = _fitImageOn.xStart,
+        yStart = _fitImageOn.yStart,
+        renderableWidth = _fitImageOn.renderableWidth,
+        renderableHeight = _fitImageOn.renderableHeight;
+
+    canvas.getContext('2d').drawImage(img, xStart, yStart, renderableWidth, renderableHeight);
   };
   img.src = URL.createObjectURL(file);
+}
+
+function fitImageOn(canvas, imageObj) {
+  var imageAspectRatio = imageObj.width / imageObj.height;
+  var canvasAspectRatio = canvas.width / canvas.height;
+  var renderableHeight = void 0,
+      renderableWidth = void 0,
+      xStart = void 0,
+      yStart = void 0;
+
+  // image's aspect ratio is less than canvas
+  if (imageAspectRatio < canvasAspectRatio) {
+    renderableHeight = canvas.height;
+    renderableWidth = imageObj.width * (renderableHeight / imageObj.height);
+    xStart = (canvas.width - renderableWidth) / 2;
+    yStart = 0;
+  }
+
+  // image's aspect ratio is greater than canvas
+  else if (imageAspectRatio > canvasAspectRatio) {
+      renderableWidth = canvas.width;
+      renderableHeight = imageObj.height * (renderableWidth / imageObj.width);
+      xStart = 0;
+      yStart = (canvas.height - renderableHeight) / 2;
+    }
+
+    // Happy path - keep aspect ratio
+    else {
+        renderableHeight = canvas.height;
+        renderableWidth = canvas.width;
+        xStart = 0;
+        yStart = 0;
+      }
+
+  return {
+    renderableHeight: renderableHeight,
+    renderableWidth: renderableWidth,
+    xStart: xStart,
+    yStart: yStart
+  };
 }
 
 function drawRect(_ref) {
@@ -236,157 +289,94 @@ function drawName(_ref2) {
   ctx.fillText(name + ' - ' + prob.toFixed(2), x, y - 10);
 }
 
+function showFiles(files) {
+  if (!files || !files.length) return;
+
+  clearCanvas();
+  $boxCanvas.removeClass('hidden');
+  $boxDropFile.addClass('hidden');
+  drawImage(files[0]);
+}
+
+function resetFiles() {
+  $boxCanvas.addClass('hidden');
+  $btnReset.addClass('hidden');
+  $boxDropFile.removeClass('hidden');
+  $btnSubmit.removeClass('hidden');
+  clearCanvas();
+  droppedFiles = false;
+}
+
+//-----------------------------------------------
+// site effect drag drop
+//-----------------------------------------------
+
+var isAdvancedUpload = function () {
+  var div = document.createElement('div');
+  return ('draggable' in div || 'ondragstart' in div && 'ondrop' in div) && 'FormData' in window && 'FileReader' in window;
+}();
+
+$input.on('focus', function () {
+  $input.addClass('has-focus');
+}).on('blur', function () {
+  $input.removeClass('has-focus');
+});
+
+if (isAdvancedUpload) {
+  $box.on('drag dragstart dragend dragover dragenter dragleave drop', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }).on('dragover dragenter', function () {
+    $box.addClass('is-dragover');
+  }).on('dragleave dragend drop', function () {
+    $box.removeClass('is-dragover');
+  }).on('drop', function (e) {
+    droppedFiles = e.originalEvent.dataTransfer.files;
+    showFiles(droppedFiles);
+  });
+}
+
 //-----------------------------------------------
 // Main methods
 //-----------------------------------------------
 
+$input.on('change', function (e) {
+  return showFiles(e.target.files);
+});
 
-(0, _jquery2.default)('#upload-form').on('submit', function (e) {
+$btnReset.on('click', resetFiles);
+
+$form.on('submit', function (e) {
   e.preventDefault();
-  var file = (0, _jquery2.default)('#uploader')[0].files[0];
-  // Clear canvas and draw image
-  clearCanvas();
-  drawImage(file);
+
+  var file = $input[0].files[0];
+  if (isAdvancedUpload && droppedFiles) {
+    file = droppedFiles[0];
+  }
+  // prevent empty file
+  if (!file) {
+    alert('Please select your idol!');
+    $form.removeClass('is-uploading');
+    return;
+  }
+  // prevent multi check
+  if ($form.hasClass('is-uploading')) return false;
+
+  $form.addClass('is-uploading');
 
   // Upload file to get detection and draw result
   uploadFile(file).then(function (response) {
     response.data.forEach(sideEffectCompose(drawRect, drawName, saveContext));
+    setTimeout(function () {
+      $form.removeClass('is-uploading');
+      $btnSubmit.addClass('hidden');
+      $btnReset.removeClass('hidden');
+    }, 1000);
+  }).catch(function (err) {
+    console.log(err);
+    // $form.removeClass('is-uploading');
   });
 });
-
-/***/ }),
-
-/***/ "./js/jquery.custom-file-input.js":
-/*!****************************************!*\
-  !*** ./js/jquery.custom-file-input.js ***!
-  \****************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(jQuery) {
-
-(function ($, window, document, undefined) {
-  // feature detection for drag&drop upload
-
-  var isAdvancedUpload = function () {
-    var div = document.createElement('div');
-    return ('draggable' in div || 'ondragstart' in div && 'ondrop' in div) && 'FormData' in window && 'FileReader' in window;
-  }();
-
-  // applying the effect for every form
-
-  $('.box').each(function () {
-    var $form = $(this),
-        $input = $form.find('input[type="file"]'),
-        $label = $form.find('label'),
-        $errorMsg = $form.find('.box__error span'),
-        $restart = $form.find('.box__restart'),
-        droppedFiles = false,
-        showFiles = function showFiles(files) {
-      $label.text(files.length > 1 ? ($input.attr('data-multiple-caption') || '').replace('{count}', files.length) : files[0].name);
-    };
-
-    // letting the server side to know we are going to make an Ajax request
-    $form.append('<input type="hidden" name="ajax" value="1" />');
-
-    // automatically submit the form on file select
-    $input.on('change', function (e) {
-      showFiles(e.target.files);
-    });
-
-    // drag&drop files if the feature is available
-    if (isAdvancedUpload) {
-      $form.addClass('has-advanced-upload') // letting the CSS part to know drag&drop is supported by the browser
-      .on('drag dragstart dragend dragover dragenter dragleave drop', function (e) {
-        // preventing the unwanted behaviours
-        e.preventDefault();
-        e.stopPropagation();
-      }).on('dragover dragenter', function () //
-      {
-        $form.addClass('is-dragover');
-      }).on('dragleave dragend drop', function () {
-        $form.removeClass('is-dragover');
-      }).on('drop', function (e) {
-        droppedFiles = e.originalEvent.dataTransfer.files; // the files that were dropped
-        showFiles(droppedFiles);
-      });
-    }
-
-    // if the form was submitted
-
-    $form.on('submit', function (e) {
-      // preventing the duplicate submissions if the current one is in progress
-      if ($form.hasClass('is-uploading')) return false;
-
-      $form.addClass('is-uploading').removeClass('is-error');
-
-      if (isAdvancedUpload) {
-        // ajax file upload for modern browsers
-        e.preventDefault();
-
-        // gathering the form data
-        var ajaxData = new FormData($form.get(0));
-        if (droppedFiles) {
-          $.each(droppedFiles, function (i, file) {
-            ajaxData.append($input.attr('name'), file);
-          });
-        }
-
-        // ajax request
-        $.ajax({
-          url: $form.attr('action'),
-          type: $form.attr('method'),
-          data: ajaxData,
-          dataType: 'json',
-          cache: false,
-          contentType: false,
-          processData: false,
-          complete: function complete() {
-            $form.removeClass('is-uploading');
-          },
-          success: function success(data) {
-            $form.addClass(data.success == true ? 'is-success' : 'is-error');
-            if (!data.success) $errorMsg.text(data.error);
-          },
-          error: function error() {
-            alert('Error. Please, contact the webmaster!');
-          }
-        });
-      } // fallback Ajax solution upload for older browsers
-      else {
-          var iframeName = 'uploadiframe' + new Date().getTime(),
-              $iframe = $('<iframe name="' + iframeName + '" style="display: none;"></iframe>');
-
-          $('body').append($iframe);
-          $form.attr('target', iframeName);
-
-          $iframe.one('load', function () {
-            var data = $.parseJSON($iframe.contents().find('body').text());
-            $form.removeClass('is-uploading').addClass(data.success == true ? 'is-success' : 'is-error').removeAttr('target');
-            if (!data.success) $errorMsg.text(data.error);
-            $iframe.remove();
-          });
-        }
-    });
-
-    // restart the form if has a state of error/success
-
-    $restart.on('click', function (e) {
-      e.preventDefault();
-      $form.removeClass('is-error is-success');
-      $input.trigger('click');
-    });
-
-    // Firefox focus bug fix for file input
-    $input.on('focus', function () {
-      $input.addClass('has-focus');
-    }).on('blur', function () {
-      $input.removeClass('has-focus');
-    });
-  });
-})(jQuery, window, document);
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js")))
 
 /***/ }),
 
