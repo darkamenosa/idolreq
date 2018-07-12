@@ -284,14 +284,20 @@ function drawName(_ref2) {
   var name = _ref2.name,
       prob = _ref2.prob,
       x = _ref2.x,
-      y = _ref2.y;
+      y = _ref2.y,
+      w = _ref2.w;
 
   var ctx = getCanvas().getContext('2d');
 
+  var textWidth = ctx.measureText('' + name).width;
+  var startX = x + (w / 2 - textWidth / 2);
+  var startY = y < 20 ? 20 : y - 10;
+
   // Draw text
   ctx.fillStyle = 'yellow';
+  ctx.textAlign = 'center';
   ctx.font = '20px Arial';
-  ctx.fillText(name + ' - ' + prob.toFixed(2), x, y - 10);
+  ctx.fillText('' + name, startX, startY);
 }
 
 function showFiles(files) {
@@ -300,6 +306,8 @@ function showFiles(files) {
   clearCanvas();
   $boxCanvas.removeClass('hidden');
   $boxDropFile.addClass('hidden');
+  $btnReset.addClass('hidden');
+  $btnSubmit.removeClass('hidden');
   drawImage(files[0]);
 }
 

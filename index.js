@@ -140,13 +140,18 @@ function drawRect({ x, y, w, h }) {
   ctx.stroke();
 }
 
-function drawName({ name, prob, x, y }) {
+function drawName({ name, prob, x, y, w }) {
   const ctx = getCanvas().getContext('2d');
+
+  const textWidth = ctx.measureText(`${name}`).width;
+  const startX = x + (w / 2 - textWidth / 2);
+  const startY = y < 20 ? 20 : y - 10;
 
   // Draw text
   ctx.fillStyle = 'yellow';
+  ctx.textAlign = 'center';
   ctx.font = '20px Arial';
-  ctx.fillText(`${name} - ${prob.toFixed(2)}`, x, y - 10);
+  ctx.fillText(`${name}`, startX, startY);
 }
 
 function showFiles(files) {
@@ -155,6 +160,8 @@ function showFiles(files) {
   clearCanvas();
   $boxCanvas.removeClass('hidden');
   $boxDropFile.addClass('hidden');
+  $btnReset.addClass('hidden');
+  $btnSubmit.removeClass('hidden');
   drawImage(files[0]);
 }
 
