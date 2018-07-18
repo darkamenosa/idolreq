@@ -139,8 +139,10 @@ var $box = (0, _jquery2.default)('.box'),
     $btnReset = (0, _jquery2.default)('.reset__button'),
     $boxDropFile = (0, _jquery2.default)('.box__drop_file'),
     $boxCanvas = (0, _jquery2.default)('.box__canvas'),
+    $boxNames = (0, _jquery2.default)('.box__names'),
     $toast = (0, _jquery2.default)('#snackbar'); // Import your code here
 
+var radius = 1;
 var droppedFiles = false;
 
 //-----------------------------------------------
@@ -201,6 +203,7 @@ function clearCanvas() {
   var canvas = getCanvas();
   var ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  $boxNames.html('');
 }
 
 function drawImage(file) {
@@ -209,60 +212,10 @@ function drawImage(file) {
 
   var img = new Image();
   img.onload = function () {
-    // TODO: integrate scale image
-    // const { xStart, yStart, renderableWidth, renderableHeight } = fitImageOn(
-    //   canvas,
-    //   img,
-    // );
     canvas.height = img.height;
     canvas.getContext('2d').drawImage(img, 0, 0);
   };
   img.src = URL.createObjectURL(file);
-}
-
-function fitImageOn(canvas, imageObj) {
-  var imageAspectRatio = imageObj.width / imageObj.height;
-  var canvasAspectRatio = canvas.width / canvas.height;
-  var renderableHeight = void 0,
-      renderableWidth = void 0,
-      xStart = void 0,
-      yStart = void 0,
-      biggerRatio = void 0;
-
-  // image's aspect ratio is less than canvas
-  if (imageAspectRatio < canvasAspectRatio) {
-    renderableHeight = canvas.height;
-    renderableWidth = imageObj.width * (renderableHeight / imageObj.height);
-    xStart = (canvas.width - renderableWidth) / 2;
-    yStart = 0;
-    biggerRatio = 'canvas';
-  }
-
-  // image's aspect ratio is greater than canvas
-  else if (imageAspectRatio > canvasAspectRatio) {
-      renderableWidth = canvas.width;
-      renderableHeight = imageObj.height * (renderableWidth / imageObj.width);
-      xStart = 0;
-      yStart = (canvas.height - renderableHeight) / 2;
-      biggerRatio = 'img';
-    }
-
-    // Happy path - keep aspect ratio
-    else {
-        renderableHeight = canvas.height;
-        renderableWidth = canvas.width;
-        xStart = 0;
-        yStart = 0;
-        biggerRatio = 'canvas';
-      }
-
-  return {
-    renderableHeight: renderableHeight,
-    renderableWidth: renderableWidth,
-    xStart: xStart,
-    yStart: yStart,
-    biggerRatio: biggerRatio
-  };
 }
 
 function drawRect(_ref) {
@@ -282,22 +235,12 @@ function drawRect(_ref) {
 
 function drawName(_ref2) {
   var name = _ref2.name,
-      prob = _ref2.prob,
       x = _ref2.x,
       y = _ref2.y,
       w = _ref2.w;
 
-  var ctx = getCanvas().getContext('2d');
-
-  var textWidth = ctx.measureText('' + name).width;
-  var startX = x + (w / 2 - textWidth / 2);
-  var startY = y < 20 ? 20 : y - 10;
-
-  // Draw text
-  ctx.fillStyle = 'yellow';
-  ctx.textAlign = 'center';
-  ctx.font = '20px Arial';
-  ctx.fillText('' + name, startX, startY);
+  var html = '<span class="box__names-item" style="top: ' + y + 'px; left: ' + x + 'px; width: ' + w + 'px;">\n  <span>' + name + '</span>  \n  </span>';
+  $boxNames.append(html);
 }
 
 function showFiles(files) {
@@ -309,6 +252,7 @@ function showFiles(files) {
   $btnReset.addClass('hidden');
   $btnSubmit.removeClass('hidden');
   drawImage(files[0]);
+  $btnSubmit.trigger('click');
 }
 
 function resetFiles() {

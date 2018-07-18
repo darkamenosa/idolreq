@@ -11474,6 +11474,20 @@ body {
 
 .box__canvas {
 	margin-bottom: 10px;
+	position: relative;
+}
+
+.box__names-item {
+	position: absolute;
+	text-align: center;
+	font-size: 15px;
+}
+
+.box__names-item span {
+	padding: 3px 10px;
+	background: yellow;
+	border-radius: 20px;
+	display: inline-block;
 }
 
 /* loading */

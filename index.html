@@ -44,6 +44,7 @@
           <div class="box__canvas hidden">
             <canvas id="artboard" style="width: 100%; height: 100%;" width="1000" height="1000">
             </canvas>
+            <div class="box__names"></div>
           </div>
           <div class="box__drop_file">
             <label for="uploader">
@@ -89,7 +90,10 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-118958903-1"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
     gtag('js', new Date());
 
     gtag('config', 'UA-118958903-1');
