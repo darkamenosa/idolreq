@@ -11339,6 +11339,7 @@ a.text-dark:hover, a.text-dark:focus {
 	box-sizing: border-box;
 }
 
+/* 
 @media (min-width: 768px) {
 	.navbar {
 		position: -webkit-sticky;
@@ -11346,7 +11347,7 @@ a.text-dark:hover, a.text-dark:focus {
 		top: 0;
 		z-index: 1071;
 	}
-}
+} */
 
 .hidden {
 	display: none !important;
@@ -11521,6 +11522,19 @@ button .loadingSpinner {
 	display: block;
 }
 
+body {
+	padding-bottom: 60px;
+}
+
+.page-footer {
+	padding: 10px;
+	position: fixed;
+	background: #343a40;
+	width: 100%;
+	bottom: 0;
+	color: #fff;
+}
+
 @keyframes loadingSpinner {
 	from {
 		-webkit-transform: rotate(0deg);
@@ -11611,6 +11625,50 @@ button .loadingSpinner {
 .navbar-dark .navbar-brand h1 {
 	font-size: 24px;
 	margin: 0;
+}
+
+/* css custom scroll bar*/
+
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-button {
+	width: 0px;
+	height: 0px;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #e1e1e1;
+	border: 0px none #ffffff;
+	border-radius: 50px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #ffffff;
+}
+
+::-webkit-scrollbar-thumb:active {
+	background: #000000;
+}
+
+::-webkit-scrollbar-track {
+	background: #666666;
+	border: 0px none #ffffff;
+	border-radius: 50px;
+}
+
+::-webkit-scrollbar-track:hover {
+	background: #666666;
+}
+
+::-webkit-scrollbar-track:active {
+	background: #333333;
+}
+
+::-webkit-scrollbar-corner {
+	background: transparent;
 }
 
 /*# sourceMappingURL=app.css.map*/
